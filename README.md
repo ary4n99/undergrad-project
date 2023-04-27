@@ -3,13 +3,13 @@
 ![Python version](https://img.shields.io/badge/python-v3.7-blue)
 !["Repository size"](https://img.shields.io/github/repo-size/ary4n99/undergrad-project)
 
-Advantage Actor-Critic (A2C) and Deep Q-Network (DQN) implementations for MountainCar-v0 and CarRacing-v2 using TensorFlow 2.
+Advantage Actor-Critic (A2C) and Deep Q-Network (DQN) implementations for MountainCar-v0 and CarRacing-v2 using TensorFlow 2, accompanied by an undergraduate thesis.
 
 ## Getting Started
 
 > **NOTE: pywin32 is used for the GUI.**
 >
-> **To run on a non-Windows machine, remove lines 8-22 (inclusive) from `utils.py`; this will remove window closing functionality for the gameplay visualization.**
+> **To run on a non-Windows machine, remove lines 8-22 (inclusive) from `code/utils.py`; this will remove window closing functionality for the gameplay visualization.**
 
 1. Clone the repository
 
