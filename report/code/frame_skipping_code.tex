@@ -1,0 +1,13 @@
+\begin{lstlisting}[style=codestyle, basicstyle=\ttfamily\footnotesize, caption={Car Racing frame skipping}, label=lst:frame_skipping]
+def take_action(env, action):
+  reward = 0
+
+  for _ in range(FRAME_SKIP + 1):
+      next_state, frame_reward, done, info = env.step(action)
+
+      reward += frame_reward
+      if done:
+          break
+
+  return next_state, reward, done, info
+\end{lstlisting}

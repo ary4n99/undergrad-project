@@ -1,0 +1,35 @@
+\begin{algorithm}[H]
+  \caption[Deep Q-Learning]{Deep Q-Learning with Experience Replay}
+  \label{alg:deep_q_learning}
+  \begin{algorithmic}
+    \State Initialize Q-network with random weights $\theta$
+    \For{episode $i$ in $1:N$}
+    \State Set initial state $s_t$
+    \While{$s_t$ is not terminal}
+    \State{
+      $
+        a_t =
+        \begin{cases}
+          \max\limits_{a_t} Q(s_t, a_t;~\theta) & \text{with probability } 1-\epsilon \\
+          \text{a random action }               & \text{with probability } \epsilon
+        \end{cases}
+      $
+    }
+    \State Take action $a_t$ and observe reward $r_t$ and new state $s_{t+1}$
+    \State Store transition $(s_t,~a_t,~r_t,~s_{t+1})$ in $\mathcal{D}$
+    \State Sample a random batch of transitions $(s_j,~a_j,~r_j,~s_{j+1})$ from $\mathcal{D}$
+    \State{
+      $
+        y_j =
+        \begin{cases}
+          r_j                                                              & \text{for terminal } s_{j+1}     \\
+          r_j +\gamma\cdot\max\limits_{a_{j+1}}Q(s_{j+1},~a_{j+1};~\theta) & \text{for non-terminal } s_{j+1}
+        \end{cases}
+      $
+    }
+    \State Perform gradient descent on $(y_j - Q(s_j,a_j;~\theta))^2$ wrt. the network weights $\theta$
+    \State Update state $s_t \gets s_{t+1}$
+    \EndWhile
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}

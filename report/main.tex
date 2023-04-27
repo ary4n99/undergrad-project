@@ -1,0 +1,121 @@
+% spell-checker: disable
+\documentclass[12pt]{report}
+
+\usepackage[a4paper, margin=3cm]{geometry}
+\usepackage[colorlinks]{hyperref}
+\usepackage[justification=centering]{caption}
+\usepackage[parfill]{parskip}
+\usepackage[stable, bottom]{footmisc}
+\usepackage[table, xcdraw, dvipsnames]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{adjustbox}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{biblatex}
+\usepackage{bm}
+\usepackage{csquotes}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{physics}
+\usepackage{pslatex}
+\usepackage{subcaption}
+\usepackage{thmtools}
+\usepackage{tikz}
+\usepackage{url}
+
+\MakeOuterQuote{"}
+
+\bibliography{references.bib}
+\BiblatexSplitbibDefernumbersWarningOff
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+
+\def\chapterautorefname{Chapter}
+\def\sectionautorefname{Section}
+\def\subsectionautorefname{Section}
+\def\subsubsectionautorefname{Section}
+\newcommand{\algorithmautorefname}{Algorithm}
+
+\renewcommand{\lstlistingname}{Code Sample}
+\renewcommand{\lstlistlistingname}{List of Code Samples}
+
+\renewcommand{\fbox}{\fcolorbox{lightgray}{white}}
+\setlength{\fboxrule}{0.1pt}
+\setlength{\fboxsep}{0pt}
+
+\setcounter{secnumdepth}{3}
+
+\immediate\write18{texcount -inc -sum -total -brief main.tex > word_count}
+
+\hypersetup{
+  linkcolor=Blue,
+  citecolor=Blue,
+  urlcolor=Blue
+}
+
+\lstdefinestyle{codestyle}{
+  language=Python,
+  numberstyle=\tiny\color{Gray},
+  commentstyle=\color{Green},
+  keywordstyle=\bfseries\color{Blue},
+  stringstyle=\color{Maroon},
+  basicstyle=\ttfamily,
+  breakatwhitespace=false,
+  breaklines=true,
+  keepspaces=true, numbers=left, numbersep=5pt, showspaces=false,
+  showstringspaces=false, showtabs=false, tabsize=2, frame=tb
+}
+\lstset{style=codestyle}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+  \large
+  \input{figures/uom_fig.tex} \\
+  \vspace*{0.4in}
+  The University of Manchester \\
+  Department of Computer Science \\
+  April 2023 \\
+  \vspace*{0.2in}
+  \textbf{\LARGE{Exploring Model-Free Deep Reinforcement Learning Techniques for Racing Games}} \\
+  \vspace*{0.2in}
+  Author: Aryan Agrawal \\
+  \vspace*{0.2in}
+  Supervisor: Dr. Ke Chen
+\end{center}
+\begin{abstract}
+  \begin{quotation}
+    \input{content/abstract.tex}
+  \end{quotation}
+\end{abstract}
+\renewcommand{\abstractname}{Acknowledgements}
+\begin{abstract}
+  \begin{quotation}
+    \input{content/thanks.tex}
+  \end{quotation}
+\end{abstract}
+\tableofcontents
+~\\~\\
+\textbf{Word Count: \input{word_count}}
+\listoffigures
+\listoftables
+\listofalgorithms
+\lstlistoflistings
+\include{content/chapter1}
+\include{content/chapter2}
+\include{content/chapter3}
+\include{content/chapter4}
+\include{content/chapter5}
+\printbibliography[notkeyword={fig}, heading=bibintoc, title={References}]
+\printbibliography[keyword={fig}, heading=bibintoc, title={References for Figures}]
+\appendix
+\include{content/appendix}
+\end{document}

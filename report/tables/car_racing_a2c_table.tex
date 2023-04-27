@@ -1,0 +1,38 @@
+\begin{table}[H]
+  \centering
+  \subfloat[Actor]{
+    \small
+    \begin{tabular}{|c|c|c|>{\centering\arraybackslash}p{1cm}|c|c|>{\centering\arraybackslash}p{1.5cm}|c|}
+      \hline
+      \textbf{Layer} & \textbf{Input}        & \textbf{Filters} & \textbf{Filter Size} & \textbf{Stride} & \textbf{Activation} & \textbf{Regular-ization} & \textbf{Output}       \\
+      \hline
+      Conv           & $84\times 84\times 3$ & 8                & $7\times 7$          & 4               & ReLU                & L2                       & $20\times 20\times 8$ \\
+      MaxPooling     & $20\times 20\times 8$ & -                & $2\times 2$          & 2               & -                   & -                        & $10\times 10\times 8$ \\
+      Conv           & $10\times 10\times 8$ & 16               & $3\times 3$          & 1               & ReLU                & L2                       & $8\times 8\times 16$  \\
+      MaxPooling     & $8\times 8\times 16$  & -                & $2\times 2$          & 2               & -                   & -                        & $4\times 4\times 16$  \\
+      Flatten        & $4\times 4\times 16$  & -                & -                    & -               & -                   & -                        & 256                   \\
+      Dense          & 256                   & -                & -                    & -               & ReLU                & L2                       & 512                   \\
+      Dense          & 512                   & -                & -                    & -               & Linear              & L2                       & 5                     \\
+      \hline
+    \end{tabular}
+  }
+  \vspace{0.8cm}
+  \subfloat[Critic]{
+    \small
+    \begin{tabular}{|c|c|c|>{\centering\arraybackslash}p{1cm}|c|c|>{\centering\arraybackslash}p{1.5cm}|c|}
+      \hline
+      \textbf{Layer} & \textbf{Input}        & \textbf{Filters} & \textbf{Filter Size} & \textbf{Stride} & \textbf{Activation} & \textbf{Regular-ization} & \textbf{Output}       \\
+      \hline
+      Conv           & $84\times 84\times 3$ & 8                & $7\times 7$          & 4               & ReLU                & L2                       & $20\times 20\times 8$ \\
+      MaxPooling     & $20\times 20\times 8$ & -                & $2\times 2$          & 2               & -                   & -                        & $10\times 10\times 8$ \\
+      Conv           & $10\times 10\times 8$ & 16               & $3\times 3$          & 1               & ReLU                & L2                       & $8\times 8\times 16$  \\
+      MaxPooling     & $8\times 8\times 16$  & -                & $2\times 2$          & 2               & -                   & -                        & $4\times 4\times 16$  \\
+      Flatten        & $4\times 4\times 16$  & -                & -                    & -               & -                   & -                        & 256                   \\
+      Dense          & 256                   & -                & -                    & -               & ReLU                & L2                       & 512                   \\
+      Dense          & 512                   & -                & -                    & -               & Linear              & L2                       & 1                     \\
+      \hline
+    \end{tabular}
+  }
+  \caption[Car Racing A2C network structure]{Car Racing advantage actor-critic layers and parameters}
+  \label{table:car_racing_a2c}
+\end{table}

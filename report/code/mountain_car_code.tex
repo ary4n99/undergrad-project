@@ -1,0 +1,30 @@
+\begin{lstlisting}[style=codestyle, basicstyle=\ttfamily\footnotesize, caption={Using OpenAI Gym with the Mountain Car environment}, label=lst:mountain_car_environment]
+import gym
+
+EPISODES = 500
+
+env = gym.make("MountainCar-v0")
+
+for e in range(EPISODES):
+    # Reset the environment and variables for each episode
+    state = env.reset()
+    t = 0
+    done = False
+    total_reward = 0
+
+    while not done:
+        # Randomly sample the action space
+        action = env.action_space.sample()
+
+        # Take the action
+        next_state, reward, done, info = env.step(action)
+
+        state = next_state
+        total_reward += reward
+        t += 1
+
+    print(f"Episode {e+1} finished after {t} timesteps "
+          f"with {total_reward} reward")
+
+env.close()
+\end{lstlisting}

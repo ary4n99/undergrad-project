@@ -1,0 +1,19 @@
+\begin{algorithm}[H]
+  \caption{Tabular Actor-Critic}
+  \label{alg:actor_critic}
+  \begin{algorithmic}
+    \State Initialize actor $\pi(a~|~s)$ with random values
+    \State Initialize critic $V(s)$ with random values
+    \For{episode $i$ in $1:N$}
+    \State Set initial state $s_t$
+    \While{$s_t$ is not terminal}
+    \State Select action $a_t$ from policy $\pi(a_t~|~s_t)$ using weighted random sampling
+    \State Take action $a_t$ and observe reward $r_t$ and new state $s_{t+1}$
+    \State Compute TD error $\delta \gets r_t+\gamma\cdot V(s_{t+1}) - V(s_t)$
+    \State Update critic values $V(s_t) \gets V(s_t) + \alpha_\text{critic}\cdot\delta$
+    \State Update actor values $\pi(a_t~|~s_t) \gets \pi(a_t~|~s_t) + \alpha_\text{actor}\cdot\delta\cdot\log\pi(a_t~|~s_t)$
+    \State Update state $s_t \gets s_{t+1}$
+    \EndWhile
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}

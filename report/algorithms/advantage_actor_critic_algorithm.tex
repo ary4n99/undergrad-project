@@ -1,0 +1,22 @@
+\begin{algorithm}[H]
+  \caption[Advantage Actor-Critic]{Advantage Actor-Critic with Entropy Regularization}
+  \label{alg:advantage_actor_critic}
+  \begin{algorithmic}
+    \State Initialize actor network with random weights $\theta_{actor}$
+    \State Initialize critic network with random weights $\theta_{critic}$
+    \For{episode $i$ in $1:N$}
+    \State Set initial state $s_t$
+    \While{$s_t$ is not terminal}
+    \State Select action $a_t$ from policy $\pi_{\theta_{actor}}(a_t~|~s_t)$ using weighted random sampling
+    \State Take action $a_t$ and observe reward $r_t$ and new state $s_{t+1}$
+    \State Compute advantage $A(s_t, a_t) \gets r_t+\gamma\cdot V(s_{t+1}) - V(s_t)$
+    \State Compute entropy $H_t\gets-\log(\pi(a_t~|~s_t)) \cdot \pi(a_t~|~s_t)$
+    \State Perform gradient descent on $-\log (\pi(a_t~|~s_t)) \cdot A(s_t, a_t) - \beta\cdot H_t$
+    \State \hspace{1cm} wrt. the actor network weights $\theta_{actor}$ and update network
+    \State Perform gradient descent on $A(s_t, a_t)^2$
+    \State \hspace{1cm} wrt. the critic network weights $\theta_{critic}$ and update network
+    \State Update state $s_t \gets s_{t+1}$
+    \EndWhile
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}

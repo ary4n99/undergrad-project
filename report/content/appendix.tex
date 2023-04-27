@@ -1,0 +1,58 @@
+\chapter{Training Hyperparameters} \label{chp:hyperparameters}
+\subsection*{Mountain Car DQN}
+\begin{itemize}
+  \item \textbf{Episodes} -- 500
+  \item \textbf{Learning rate} -- $1 \times 10^{-3}$
+  \item \textbf{$\gamma$} -- 0.99
+
+  \item \textbf{$\epsilon$ initial value} -- 1.00
+  \item \textbf{$\epsilon$ decay multiplier} -- 0.99
+  \item \textbf{$\epsilon$ minimum} -- 0.01
+  \item \textbf{Action probabilities} -- $[0.4, 0.2, 0.4]$ for $\left[\text{left}, \text{nothing},
+            \text{right}\right]$
+
+  \item \textbf{Batch size} -- 32
+  \item \textbf{Replay buffer size} -- 100000
+\end{itemize}
+
+\subsection*{Mountain Car A2C}
+\begin{itemize}
+  \item \textbf{Episodes} -- 500
+  \item \textbf{Learning rate} -- $1 \times 10^{-3}$
+  \item \textbf{$\gamma$} -- 0.99
+\end{itemize}
+
+\newpage
+
+\subsection*{Car Racing DQN}
+\begin{itemize}
+  \item \textbf{Episodes} -- 500
+  \item \textbf{Learning rate} -- $1 \times 10^{-3}$
+  \item \textbf{$\gamma$} -- 0.95
+
+  \item \textbf{Frame skip} -- 2
+  \item \textbf{Frame stack size} -- 3
+  \item \textbf{Negative reward break} -- 100
+
+  \item \textbf{$\epsilon$ initial value} -- 1.00
+  \item \textbf{$\epsilon$ decay multiplier} -- 0.99
+  \item \textbf{$\epsilon$ minimum} -- 0.01
+  \item \textbf{Action probabilities} -- $[0.0, 0.2, 0.2, 0.5, 0.1]$ for $\left[\text{nothing},
+            \text{left}, \text{right}, \text{gas}, \text{brake}\right]$
+
+  \item \textbf{Batch size} -- 32
+  \item \textbf{Replay buffer size} -- 5000
+\end{itemize}
+
+\subsection*{Car Racing A2C}
+\begin{itemize}
+  \item \textbf{Episodes} -- 500
+  \item \textbf{Learning rate} -- $1 \times 10^{-5}$
+  \item \textbf{$\gamma$} -- 0.95
+
+  \item \textbf{Frame skip} -- 2
+  \item \textbf{Frame stack size} -- 3
+  \item \textbf{Negative reward break} -- 100
+
+  \item \textbf{Entropy coefficient} -- 0.1
+\end{itemize}

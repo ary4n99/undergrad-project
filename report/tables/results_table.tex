@@ -1,0 +1,18 @@
+\begin{table}[H]
+  \centering
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    \multicolumn{2}{|c|}{\multirow{2}{*}}                        & \multicolumn{2}{c|}{\textbf{Game}}                                                                             \\
+    \cline{3-4}
+    \multicolumn{2}{|c|}{\multirow{-2}{*}{\textbf{Score Table}}} & \textbf{Mountain Car}                                                & \textbf{Car Racing}                     \\
+    \hline
+    \multirow{4}{*}{\textbf{Agent}}
+                                                                 & \textbf{Random}                                                      & $-200\pm 0$         & $-65\pm 6$        \\
+                                                                 & \textbf{DQN}                                                         & $-137\pm21$         & $\bm{623\pm 182}$ \\
+                                                                 & \textbf{A2C}                                                         & $\bm{-135\pm 32}$   & $-17\pm 47$       \\
+                                                                 & \textbf{Research} \cite{hernandez2019understanding, ha2018recurrent} & $-151 \pm 18$       & $343 \pm 18$      \\
+    \hline
+  \end{tabular}
+  \caption[DQN and A2C testing results]{Average rewards after 500 episodes of training (1000 episode testing mean). The highest score for each game is in \textbf{bold}.}
+  \label{table:results}
+\end{table}

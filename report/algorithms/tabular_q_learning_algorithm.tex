@@ -1,0 +1,25 @@
+\begin{algorithm}[H]
+  \caption{Tabular Q-Learning}
+  \label{alg:q_learning}
+  \begin{algorithmic}
+    \State Initialize Q-table $Q(s,~a)$ with random values
+    \For{episode $i$ in $1:N$}
+    \State Set initial state $s_t$
+    \While{$s_t$ is not terminal}
+    \State{
+      $
+        a_t =
+        \begin{cases}
+          \max\limits_{a_t} Q(s_t, a_t) & \text{with probability } 1-\epsilon \\
+          \text{a random action }       & \text{with probability } \epsilon
+        \end{cases}
+      $
+    }
+    \State Take action $a_t$ and observe reward $r_t$ and new state $s_{t+1}$
+    \State Compute TD error $\delta \gets r_t+\gamma\cdot\max\limits_{a_{t+1}} Q(s_{t+1},~a_{t+1}) - Q(s_t,~a_t)$
+    \State Update Q-table values $Q(s_{t},~a_{t})\leftarrow Q(s_{t},~a_{t})+\alpha\cdot\delta$
+    \State Update state $s_t \gets s_{t+1}$
+    \EndWhile
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}

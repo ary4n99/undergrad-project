@@ -1,0 +1,56 @@
+\chapter{Conclusion}
+
+\section{Achievements}
+We have successfully achieved our goals for this project; we have shown the
+vast improvement that domain specific techniques such as input preprocessing,
+negative reward breaks, custom exploration action probabilities and reward
+shaping can bring to advantage actor-critic and deep Q-learning techniques. We
+achieved over 9\% improvement in score for the Mountain Car environment and
+86\% improvement in score for the Car Racing environment, within 500 episodes
+for three agents and 1000 episodes for the fourth. We have also shown the
+benefit of a robust visualization system in helping with the fine tuning of our
+neural network's hyperparameters.
+
+This project has been very insightful in terms of researching, understanding,
+and optimizing a range of reinforcement learning algorithms, and their
+applications to game playing environments; I have learned a great deal about
+reinforcement learning and its constantly expanding capabilities.
+
+\section{Limitations}
+
+Any project would not be complete without its weaknesses, and this project is
+no different. A major finding from the experimentation was the limitation of
+restricting training episodes; while we were successful in improving model
+performance with the constraints, these results came with a cost to the
+stability of the model, most prevalently but not exclusively to the Car Racing
+deep Q-network.
+
+We also needed more than 500 episodes to reach performance comparable to the
+research values in Car Racing with the advantage actor-critic agent; this
+clearly indicates room for improvement in the algorithm.
+
+\newpage
+
+\section{Future Work}
+
+Improving reinforcement learning model stability is a key area of research to
+allow these algorithms to be applied to more complex scenarios. Predictability
+is of utmost importance in real world situations such as vision based
+self-driving vehicles \cite{liang2018cirl, sallab2016end} and multi-robot path
+planning \cite{yang2020multi}. This could be done using techniques such as
+target networks with soft network updates \cite{lillicrap2015continuous},
+stochastic weight averaging \cite{nikishin2018improving}, and gradient clipping
+\cite{mai2021stability}.
+
+Another area for future development could be to investigate the impact of
+$n$-step advantage actor-critic algorithms, where $n$ is the primary
+hyperparameter under test. The lack of direct research in this field makes it
+an excellent topic for further investigation.
+
+Looking beyond the scope of this project, the recent proposals of using quantum
+agents in reinforcement learning through techniques such as quantum Q-learning,
+which uses parametrized quantum circuit instead of traditional neural networks
+\cite{skolik2022quantum}, are an extremely thrilling prospect which I intend to
+pursue in the near future.
+
+\nocite{*}

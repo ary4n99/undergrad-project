@@ -1,0 +1,4 @@
+\begin{lstlisting}[style=codestyle, basicstyle=\ttfamily\footnotesize, caption={Mountain Car reward shaping}, label=lst:reward_shaping]
+def shape_reward(state, next_state, reward):
+  return reward + 300 * (abs(next_state[1]) - abs(state[1]))
+\end{lstlisting}

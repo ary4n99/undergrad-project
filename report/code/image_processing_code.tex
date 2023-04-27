@@ -1,0 +1,20 @@
+\begin{lstlisting}[style=codestyle, basicstyle=\ttfamily\footnotesize, caption={Car Racing state image preprocessing}, label=lst:car_racing_image_processing]
+def process_state(state):
+  # Desaturation
+  state = cv2.cvtColor(state, cv2.COLOR_BGR2GRAY).astype(float)
+
+  # Masking
+  cv2.rectangle(state, (45, 66), (50, 76), 0, -1)
+
+  # Colour homogenization
+  state[np.where((state >= 160) & (state < 180))] = 255
+  state[np.where((state >= 90) & (state < 160))] = 100
+
+  # Cropping
+  state = state[0:84, 6:90]
+
+  # Normalization
+  state /= 255.0
+
+  return state
+\end{lstlisting}

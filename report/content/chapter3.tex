@@ -1,0 +1,446 @@
+\chapter{Design \& Implementation} \label{chp:design_implementation}
+This chapter explores the design and specific techniques used in this project.
+We first look at the overall system architecture, and then dive deeper into the
+chosen reinforcement learning algorithms, agents, neural networks, and
+graphical user interface.
+
+\section{Architecture}
+This section describes the architectural design of the implementation. The
+system consists of two overarching components: the graphical user interface
+(GUI), and the Python notebooks used to train the models. There are two shared
+folders used by both the user interface and training notebooks. Additionally,
+there is a suite of utilities that is shared between all of the components,
+\lstinline{utils.py}, for operations such as logging, file load and save
+functions, and string processing functions.
+
+We can see the connections between these components and the data flow in
+\autoref{fig:project_schematic}; the filled arrowheads represent data flowing
+in the specified direction, while the hollow arrowheads represent component and
+function calls.
+
+\input{figures/project_schematic.tex}
+
+\subsection{Training Notebooks}
+As the name suggests, the training notebooks are used to train the agents;
+there is a separate file for each game-agent pair, as that allows us to fine
+tune the code for the relevant environment. The shared functions have been
+abstracted to the utilities file, leaving only the core functionality of the
+neural network and agent in the respective notebooks. These notebooks use
+TensorFlow 2 to implement the neural networks, and they use the Gym API to
+facilitate the agent's interactions with the environment; this process is
+explained further in \autoref{sec:gym_environment}.
+
+\subsection{Shared File Storage}
+The training notebooks and user interface share two common storage folders:
+\lstinline{models} and \lstinline{reward_history}. The Python notebooks produce
+\lstinline{.h5} model files, which are the saved Keras models representing the
+network's weights and any other data required to recreate the exact same model
+when loaded. The notebooks also produce \lstinline{.npy} files, which contain a
+numpy array of the total reward from every episode during training; this allows
+us to plot visualizations containing a reward history graph with a slider to
+control the rolling average window size.
+
+\subsection{Graphical User Interface}
+We have a master graphical user interface runner file, \lstinline{gui.py},
+which calls separate user interface runners for each of the games; this was
+required due to the differences between the games and therefore the differences
+in network architectures. When the user selects a visualization, the
+corresponding files read the required data from the shared folders and display
+the selected visualization. This is described in further detail in
+\autoref{sec:visualization_design}.
+
+\subsection{Environment}
+
+\subsubsection{Conda}
+In order to ensure consistency and reliability during the development process,
+we used a \lstinline{conda} environment to run the project. This allowed us to
+install the required version of Python and the imported packages, without
+interference from an existing Python installation on the machine.
+
+\subsubsection{OpenAI Gym} \label{sec:gym_environment}
+
+This project uses Gym, a Python toolkit developed by OpenAI that provides a
+standardized environment for training and testing ML models. It also provides
+implementations for both of the chosen games, and many more classic control
+games and complex environments \cite{brockman2016gym}. The efficiency and
+extensibility of this library allows us to focus on the implementation of the
+neural networks and the experimentation of the hyperparameters.
+
+The Python code in \autoref{lst:mountain_car_environment} shows basic usage of
+the API to create and interact with the Mountain Car environment. The
+environment is first initialized with the selected game, and it is reset for
+each episode. We have the option to set a seed for testing to ensure equal
+environments and starting states for both agents, although we would like
+randomness during training for generalization in newly generated environments.
+We pass the state to our agent, which then chooses an action. This is used to
+step through the environment, until the game is solved, or the maximum number
+of timesteps is reached, as described in \autoref{sec:mountain_car_background}
+and \autoref{sec:car_racing_background}. After the episode is finished, the
+environment is closed.
+
+\input{code/mountain_car_code.tex}
+
+Both environments use a discrete action space; this is a conscious decision, as
+the DQN algorithm can't work with continuous action spaces, while A2C can.
+Choosing discrete variations of the games instead of the continuous ones
+ensures both algorithms are trained and tested under the exact same conditions.
+Due to the difference in the input and output space of the games, separate
+agents are used for each game.
+
+Since one of the primary aims of this project is to decrease training time for
+the neural networks, we set the hyperparameter for the maximum number of
+episodes to 500.
+
+\section{Deep Q-Learning}
+As the name suggests, deep Q-learning is the combination of Q-learning with
+deep neural networks; these networks are used as function approximators for the
+Q-value function. \autoref{fig:q_vs_dq} shows the difference between both of
+these techniques.
+
+\input{figures/q_vs_dq.tex}
+
+\newpage
+
+We use $\theta$ to represent the neural network's weights. We need to define a
+loss function in order to update the weights and train the neural network.
+
+\begin{definition}
+  The \textit{loss function}
+  $$L(\theta)=\mathbb{E}\left[\left(r_t+\gamma\cdot\max_{a_{t+1}}Q(s_{t+1},~a_{t+1};~\theta)-Q(s_{t},~a_{t};~\theta)\right)^{2}\right]$$
+  \begin{itemize}[label={}]
+    \item $Q(s_t,~a_t;~\theta)$, Q-value for state-action pair
+    \item $r_t$, immediate reward
+    \item $\gamma$, discount factor of future reward
+    \item $\max\limits_{a_{t+1}} Q(s_{t+1},~a_{t+1};~\theta)$, estimate of optimal future reward for next state
+  \end{itemize}
+\end{definition}
+
+The loss function is the same as the square of the TD error, defined in
+\autoref{def:td_error_q_learning}. Taking the derivative of the loss function
+with respect to the network weights gives us a gradient, which can be
+optimized.
+
+\begin{definition}
+  The \textit{gradient}
+  $$\frac{\partial{L(\theta)}}{\partial
+      \theta}=\mathbb{E}\left[\left(r_t+\gamma\cdot\max_{a_{t+1}}Q(s_{t+1},~a_{t+1};~\theta)-Q(s_{t},~a_{t};~\theta)\right)\frac{\partial{Q(s_{t},~a_{t};~\theta)}}{\partial\theta}\right]$$
+\end{definition}
+
+\subsection{Epsilon Greedy} \label{sec:epsilon_greedy}
+$\epsilon$-greedy is a commonly used exploration technique for balancing the exploration-exploitation
+tradeoff in off-policy algorithms. The hyperparameter $\epsilon$ is used to
+determine the probability with which the agent explores. An action $a$ is selected as follows:
+
+$$
+  a =
+  \begin{cases}
+    \underset{a~\in~A}{\arg\max}~Q(a) & \text{with probability } 1-\epsilon \\
+    \text{a random action }           & \text{with probability } \epsilon
+  \end{cases}
+$$
+
+The value of $\epsilon$ decays as the number of episodes increases; it
+eventually reaches a lower bound value, where it stays for the rest of the
+training process.
+
+The idea behind decaying $\epsilon$ is that the agent becomes more confident in
+its policy as training progresses, slowly reducing the need to choose random
+actions. An example of a decay graph is shown in \autoref{fig:epsilon_decay}.
+
+\input{figures/epsilon_decay_fig.tex}
+
+\subsection{Experience Replay} \label{sec:experience_replay}
+
+Experience replay is a technique used to improve the efficiency and stability
+of the training process. Instead of using each experience\footnote{Experience
+  refers to a transition from one state to another, and the associated action and
+  reward} only once, this technique involves storing the agent's experiences in a
+replay buffer $\mathcal{D}$. These experiences are then uniformly sampled in
+minibatches during training, $U(\mathcal{D})$, which allows the agent to learn
+from experiences that occurred in different parts of the state space, helping
+with the network's generalization for new situations as it is not simply
+learning from successive experiences. Improving generalization also helps with
+the moving targets problem, described in earlier in
+\autoref{sec:on_vs_off_policy}. We can provide an updated definition for our
+loss function, incorporating experience replay.
+
+\begin{definition}
+  The \textit{loss function with experience replay}
+  $$L(\theta)=\mathbb{E}_{(s_t,~a_t,~r_t,~s_{t+1})~\thicksim ~U(\mathcal{D})}\left[\left(r_t+\gamma\cdot\max_{a_{t+1}}Q(s_{t+1},~a_{t+1};~\theta)-Q(s_{t},~a_{t};~\theta)\right)^{2}\right]$$
+\end{definition}
+
+This project implements uniformly sampled experience replay, the technique
+described above, as it provides excellent results \cite{mnih2013playing}. There
+are many advanced variations of experience replay, including prioritized
+experience replay \cite{schaul2015prioritized} and hindsight experience replay
+\cite{andrychowicz2017hindsight}, which optimize this method further.
+
+Below, we can see both a schematic and code implementation of the deep Q
+learning algorithm, including all of the aforementioned improvements.
+
+\input{figures/dqn_architecture_fig.tex}
+
+\input{algorithms/deep_q_learning_algorithm.tex}
+
+\newpage
+
+\section{Advantage Actor-Critic}
+
+Advantage actor-critic (A2C) is an instance of the actor-critic method, using
+neural networks to approximate the actor and critic functions. We make some
+improvements to the generic one-step actor-critic algorithm, by using entropy
+regularization to encourage exploration, discussed in
+\autoref{sec:entropy_regularization}. A2C was chosen due to its stability and
+sample-efficiency compared to similar algorithms, such as Asynchronous
+Advantage Actor-Critic (A3C) \cite{wu2017scalable}. We can define an advantage
+function, which in the case of the one-step algorithm is equivalent to the TD
+error in \autoref{def:td_error_actor_critic}.
+
+\begin{definition} \label{def:td_error_a2c}
+  The \textit{advantage}
+  $$A(s_t, a_t) = r_t+\gamma\cdot V(s_{t+1}) - V(s_t)$$
+  \begin{itemize}[label={}]
+    \item $r_t$, immediate reward
+    \item $\gamma$, discount factor of future reward
+          \begin{itemize}[label={}]
+            \item $\gamma\in[0,1]$
+          \end{itemize}
+    \item $V(s_t)$, estimate of cumulative reward from current state
+    \item $V(s_{t+1})$, estimate of cumulative reward from next state
+  \end{itemize}
+\end{definition}
+
+We can use this advantage function to compute the losses for both the actor and
+the critic.
+
+\begin{definition}
+  The \textit{actor loss function}
+  $$L_{actor}=-\log (\pi(a_t~|~s_t)) \cdot A(s_t, a_t)$$
+\end{definition}
+
+\begin{definition}
+  The \textit{critic loss function}
+  $$L_{\text{critic}} = A(s_t, a_t)^2$$
+\end{definition}
+
+\subsection{Stochastic Policy Exploration}
+By using a stochastic policy rather than the deterministic variant, we
+encourage the agent to explore, as we select an action based on the weighted
+probability rather than taking the action with the maximum probability, like in
+the Q-learning methods. The policy is initialized with random values, allowing
+this technique to increase the probability of the agent exploring with new
+state-action pairs in the beginning of the training process.
+
+\subsection{Entropy Regularization} \label{sec:entropy_regularization}
+Entropy regularization further encourages exploration by adding an entropy term
+to the loss function of the actor, which is derived from the probability
+distribution over the actions. This entropy term "flattens" the distribution,
+forcing exploration by increasing the chances of an action with a lower
+probability according to the actor network being chosen.
+
+\begin{definition}
+  The \textit{entropy} of the policy distribution
+  $$H_t=-\log(\pi(a_t~|~s_t)) \cdot \pi(a_t~|~s_t)$$
+\end{definition}
+
+\begin{definition}
+  The \textit{actor loss function with entropy regularization}
+  $$L_{actor}=-\log (\pi(a_t~|~s_t)) \cdot A(s_t, a_t) - \beta\cdot H_t$$
+\end{definition}
+
+$\beta$ represents the entropy coefficient; a value of 0 means that no entropy regularization is used. As we increase this value, we increase the amount of regularization applied. The factor
+is a hyperparameter optimized during training, with common values being
+$\beta\in[0.01,0.50]$. We can see a visual representation of this in \autoref{fig:entropy_regularization}.
+
+\input{figures/entropy_regularization_fig.tex}
+
+Below, we have the pseudocode for the advantage actor-critic algorithm with
+entropy regularization.
+
+\input{algorithms/advantage_actor_critic_algorithm.tex}
+
+\section{Agents}
+
+This section outlines the implementation details of the agents, and it includes
+the design of the neural networks; they have been implemented in Python 3.7
+exactly as described in \autoref{alg:deep_q_learning} and
+\autoref{alg:advantage_actor_critic}.
+
+The network structure was not the basis of experimentation, so it was kept
+relatively constant during the evaluation process. Model architectures were
+inspired and adapted from other applications with similar input and output
+structures.
+
+The networks used in this project were trained using the "Adam" gradient
+descent optimizer, as it has been shown to outperform alternative methods such
+as stochastic gradient descent (SGD) and RMSProp \cite{kingma2014adam}.
+
+\subsection{Mountain Car}
+
+\subsubsection{Neural Networks}
+Data is received from the environment, and it is inputted directly into the
+dense (fully connected) layers of the neural network. For Mountain Car, three
+layers were used for the Q-network and actor network, and two layers were used
+for the critic network. We can see the networks' details in the tables below.
+
+\input{tables/mountain_car_dqn_table.tex}
+
+\input{tables/mountain_car_a2c_table.tex}
+
+\subsubsection{Reward Shaping} \label{sec:reward_shaping}
+
+The Mountain Car environment has sparse rewards, so it benefits greatly in
+terms of training performance to shape the reward function during training. The
+same idea cannot be applied to Car Racing, as we only have access to an image
+of the current frame. For this reason, we apply reward shaping in Mountain Car
+to improve training speed and final scores.
+
+In Mountain Car, the agent receives a reward of -1 for every timestep, without
+any indication on performance until the episode is finished, or the goal is
+reached. This means that learning is greatly diminished, as the agent can not
+learn anything meaningful in the timesteps before the end of the episode. To
+combat this issue, we can use reward shaping to guide the agent towards the
+goal. We define a reward shaping function as shown in
+\autoref{lst:reward_shaping}.
+
+\input{code/reward_shaping_code.tex}
+
+This reward function takes into account the speed of the car before and after
+the action, \lstinline{state[1]} and \lstinline{next_state[1]} respectively. By
+adding the scaled difference in speed to the reward, the agent is incentivized
+to gain more speed than had previously. The multiplier value 300 was found to
+produce the highest scores after training.
+
+\subsection{Car Racing}
+
+\subsubsection{Frame Skipping}
+
+A very important aspect of this environment is the idea of using a frame skip.
+Without frame skipping, the frames in the frame stack are very similar as they
+are consecutive, so they provide little information to the neural network about
+the car's dynamics. To combat this, the agent repeats the action chosen $n + 1$
+times instead of just once, and only the final state observed is added to the
+frame stack. This means that consecutive images on the frame stack are further
+apart in the game, and provide more information to the network about the car.
+This is shown in visually \autoref{fig:frame_skip}. We can define a
+\mbox{\lstinline{take_action()}} function as shown in \autoref{lst:frame_skipping}
+and call this function instead of directly calling \lstinline{env.step()} in
+the main episode loop for the Car Racing agents.
+
+\input{figures/frame_skip_fig.tex}
+
+\newpage
+
+\input{code/frame_skipping_code.tex}
+
+\subsubsection{Input Preprocessing}
+
+For the Car Racing agent, we need to process the image before it can be passed
+to the Dense layers of the network. This section is not applicable for the
+Mountain Car environment, as we receive direct data about the car's position
+and velocity.
+
+The state returned by the Gym environment is a $96\times 96$ RGB image, which
+contains:
+
+\begin{itemize}
+  \item A dynamically coloured car at a fixed coordinate position in the image
+  \item A polychromatic gray track and green grass surrounding the track
+  \item Red and white curbs on the track corners (not visible in the figure) black
+  \item A "dashboard" at the bottom with metadata about the car
+\end{itemize}
+
+Most of these details are unnecessary, and would require more extensive and
+complex neural networks to extract features relevant to the policy. We can
+therefore process the image before passing it to the network. Below are the
+steps used in this project for doing so, and their corresponding line of code
+in \autoref{lst:car_racing_image_processing}. OpenCV and numpy were used for
+this, as shown in the code sample.
+
+\begin{itemize}
+  \item \textbf{Desaturation} -- converts the image to greyscale reducing the
+        computational load by turning a $96\times 96\times 3$ image to $96\times
+          96\times 1$, without losing any necessary detail
+  \item \textbf{Masking} -- draws a black box to emphasize the car and
+        reduce unwanted interference from the car's details and changing colour between
+        episodes
+  \item \textbf{Colour homogenization} -- homogenizes the different colour shades of
+        the track (including curbs) and grass, which add unnecessary complexity; these
+        details are not required to find the optimal policy
+  \item \textbf{Cropping} -- crops the "dashboard" area, as it is not required and adds
+        an unwanted artefact to the image; the square ratio is maintained by cropping
+        the sides of the image, as these areas mostly only contain grass
+  \item \textbf{Normalization} -- scales pixel values to be in the range $[0, 1]$,
+        helping the optimization algorithm navigate the parameter space
+\end{itemize}
+
+\newpage
+
+\input{code/image_processing_code.tex}
+
+The result of this image processing can be seen in
+\autoref{fig:car_racing_state_processing}. Note that the grey border is not
+part of the image passed to the neural network, and has been added for image
+edge clarity.
+
+\input{figures/car_racing_state_processing_fig.tex}
+
+\subsubsection{Neural Networks}
+
+Images are added to the frame stack after they have been preprocessed, and the
+entire data structure is passed to the neural network. The frame stack allows
+the network to deduce the car's speed and direction, as explained in
+\autoref{sec:markov_property}.
+
+The first step performed by the neural networks is a convolution with ReLU
+activation, paired with a max pooling layer. This is then repeated once again
+with different filter sizes, after which a flatten layer linearizes the data.
+The linear data is then passed to the two dense layers of the neural network.
+
+This structure is common across the deep Q-network and both the actor and
+critic networks, with the only difference being the output size. Below are
+tables with the exact parameters used in the neural networks for both
+algorithms.
+
+\input{tables/car_racing_dqn_table.tex}
+
+\input{tables/car_racing_a2c_table.tex}
+
+\newpage
+
+\section{Visualization} \label{sec:visualization_design}
+As this project was coded in Python using Tensorflow 2, there were a couple
+options considered for the visualization. The first was a web based GUI using
+Tensorflow.js, although this would have required an emulation system to be able
+to see the gameplay in the browser, making it a needlessly complicated option.
+
+The method implemented for this project was a Tkinter\footnote{Tkinter is a
+  Python standard library GUI toolkit} based GUI. In order to make the user
+interface look modern, we used the Ttk styling module, which is included in the
+standard Tkinter installation.
+
+The GUI consists of two modes for each of the game-algorithm pairs: gameplay
+visualization, allowing the user to view the chosen agent play an episode of
+the chosen game with a model that has been trained for a specified number of
+episodes; and model/reward visualization, which shows the user the progression
+of the model's weights and biases as training progresses, alongside a reward
+graph. \autoref{fig:gui} shows the main menu of the GUI, where the user can
+select the aforementioned visualization modes.
+
+\input{figures/gui_fig.tex}
+
+In \autoref{fig:mountain_car_gui}, we can see the visualizations for Mountain
+Car. On the left, have a visualization of the reward history graph with a
+slider to control the rolling average window size. On the right, we have both a
+weight distribution histogram and node connection graph side by side. The
+slider below controls which model to use for the graphs, based on the number of
+training episodes.
+
+\autoref{fig:car_racing_gui} shows the Car Racing visualization GUI. Similarly to the Mountain Car visualization, we have a reward history graph. This works in exactly the same way as described above, as it is using the same runner file to load the GUI, with different data. The difference lies in the model visualization, where we can see the filters of the first layer of the CNN instead.
+
+The GUI dynamically updates to reflect the changes in the graphs when either of
+the sliders is used.
+
+\input{figures/mountain_car_gui_fig.tex}
+
+\input{figures/car_racing_gui_fig.tex}

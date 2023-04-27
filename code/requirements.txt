@@ -1,0 +1,10 @@
+gym==0.25.2
+matplotlib==3.5.3
+numpy==1.21.6
+opencv_python==4.7.0.72
+pywin32==305
+tensorflow==2.11.0
+pygame==2.1.0
+ufal.pybox2d==2.3.10.2
+ipykernel==6.16.2
+notebook==6.5.3
